@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+	</head>
+	<style type="text/css">
+		*{
+			padding: 0;
+			margin: 0;
+			box-sizing: border-box;
+		}
+		body {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			width: 100vw;
+			height: 100vh;
+			background-color:white;
+		}
+		audio {
+			width: calc(100%*0.7);
+			height: 100px;
+			outline: none;
+			}
+		#box {
+			width:calc(100%*0.6);
+			border: 1px solid red;
+			height: 500px;
+			margin-top: 30px;
+			overflow: hidden;
+			}
+		#box ul {
+			width: 100%;
+			height: 100%;
+			transform: translateY(250px);
+		}
+		#box ul li {
+			width: 100%;
+			height: 35px;
+			text-align: center;
+			list-style: none;
+		}
+		.active {
+			font-weight: bold;
+			background-color:#CCCCCC;
+		}
+	</style>
+	<body>
+		<div id="box">
+			<ul>
+				
+			</ul>
+		</div>
+		<audio src="./music/kocBAF-ZNKuAJBDIACxrmdrmvsM892.mp3" controls="controls" id="music">
+			当前浏览器不支持audio
+		</audio>
+		<input type="file" name="" id="" value="" />
+		<script type="text/javascript" src="lrc.js">
+		</script>
+		<script type="text/javascript">
+			let audio=document.getElementById("music");
+			let weizhi=0;
+			let reg1=/\].+\s/g
+			let allgeci=Array.from(lrc.match(reg1));
+			let ul=document.getElementsByTagName("ul")[0];
+			let suipian=document.createDocumentFragment();
+			suipian.innerHTML="";
+			
+			
+			
+			for(let i=0;i<allgeci.length;i++)
+			{
+				allgeci[i]=allgeci[i].replace(']','').trim();
+				let li=document.createElement("li");
+				if(i==0) li.className="active";
+				li.innerHTML=allgeci[i];
+				suipian.appendChild(li);
+			}
+			
+			
+			
+			reg1=/\[.+\].+/g
+			allgeci=Array.from(lrc.match(reg1));
+			for(let i=0;i<allgeci.length;i++){
+				
+				allgeci[i]=allgeci[i].replace(/\.\d{2}/,'').trim();
+			}
+			ul.appendChild(suipian);
+			audio.volume=0.1;
+			
+			
+			function getformat(nowtime)
+			{
+				let a=Math.floor(nowtime/60)<10?'0'+Math.floor(nowtime/60):Math.floor(nowtime/60);
+				let b=Math.floor(nowtime%60)<10?'0'+Math.floor(nowtime%60):Math.floor(nowtime%60);
+				 return a+ ':' +b;
+			}
+			
+			
+			let lastgc;
+			audio.addEventListener("timeupdate",function(){ //00:00.00 分 秒 毫秒
+				let nowtime=audio.currentTime;
+				let format=getformat(nowtime)
+				
+				let reg=new RegExp('\\['+format+'\.\\d{2}\\].+');
+				let geci=reg.exec(lrc)
+				if(geci)
+				{
+					geci=reg.exec(lrc)[0].replace(/\.\d{2}/,'').trim();
+					
+				}else  geci='';
+				
+				
+				if(lastgc!=geci)
+				{
+					weizhi=0;
+					while(geci && allgeci[weizhi]!=geci)
+					{
+						weizhi++;
+						move();
+					}
+					
+				}
+				lastgc=geci;
+			})
+			
+			
+			
+			let allLi=ul.getElementsByTagName("li");
+			allLi=Array.from(allLi);
+			
+			
+			
+			function move()
+			{
+				ul.style.transform=`translateY(${250-35*weizhi}px)`
+				allLi.forEach(function(item){item.className=""});
+				allLi[weizhi].className="active";
+			}
+		</script>
+	</body>
+</html>

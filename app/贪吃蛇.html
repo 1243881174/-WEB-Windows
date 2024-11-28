@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			body,html{
+				width: 100vw;
+				height: 100vh;
+			}
+			body {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				background-color: white;
+			}
+			#box {
+				display: grid;
+				grid-template-columns: repeat(15, 1fr);
+				grid-template-rows: repeat(15, 1fr);
+				width: 900px;
+			}
+
+			#box div {
+				background-color: pink;
+				border: 1px black solid;
+
+			}
+		</style>
+	</head>
+	<body>
+		<div id="box">
+		</div>
+		<script type="text/javascript">
+			
+			var col = 15,
+				row = 15;
+			let box = document.getElementById("box");
+			
+			let W=document.body.clientWidth;
+			let H=document.body.clientHeight;
+			let ration=0.9;
+			box.style.width=H*ration+"px";
+			box.style.height=H*ration+"px";
+			window.onresize = function() {
+				 W=document.body.clientWidth;
+				 H=document.body.clientHeight;
+				 box.style.width=H*ration+"px";
+				 box.style.height=H*ration+"px";
+			}
+			
+			let long = 0;
+			let bodylong = [];
+
+			let body = box.getElementsByTagName("div");
+
+			function touch() {
+				for (let i = 0; i < bodylong.length; i++) {
+					if (head == bodylong[i]) {
+						alert("你gg了");
+					}
+				}
+			}
+
+			function judge(a, b) {
+				let eat=false;
+				if (a == b) {
+					eat=true
+					long++;
+				}
+				if (long != 0) {
+					bodylong.unshift(a);
+				}
+				while (bodylong.length > long) {
+					body[bodylong.pop()].style.backgroundColor = "pink";
+				}
+				for (let i1 = 0; i1 < bodylong.length; i1++) {
+					body[bodylong[i1]].style.backgroundColor = "green"
+				}
+				if(eat)
+				{
+					food = rand();
+					eat=false;
+				}
+				
+			}
+
+			function move(snackhead, position) { //snackhead是修改前的值
+				//127 第一个
+				touch();
+				let result=127;
+				body[snackhead].style.backgroundColor = "pink"
+				switch (position) {
+					case 1:
+						result = snackhead - row;
+						if (result < 0) result = result + (row * row);
+						break;
+					case 2:
+						snackhead % row == 0 ? result = snackhead + row - 1 : result = snackhead - 1;
+						break;
+					case 3:
+						result = snackhead + row;
+						if (result > row * row - 1) result = result - row * row;
+						break;
+					case 4:
+						result = snackhead + 1;
+						result % row == 0 ? result = result - row : result;
+						break;
+					default:
+						body[snackhead].style.backgroundColor = "red";
+						break;
+				}
+				judge(snackhead, food);
+				body[result].style.backgroundColor = "red";
+				changeposition = position;
+				return result;
+			}
+
+			function rand() {
+				let rand;
+				let long = body.length;
+				rand = Math.floor(Math.random() * long);
+				for (let i = 0; i < bodylong.length; i++) {
+					if (rand == bodylong[i] || rand == head) {
+						rand = Math.floor(Math.random() * long);
+						console.log(rand);
+						i = 0;
+					}
+				}
+				body[rand].style.backgroundColor = "yellow"
+				return rand;
+			}
+
+			function chushihua() {
+				let wdsp = document.createDocumentFragment();
+				wdsp = "";
+				let i1 = 0;
+				i = 0
+				for (i1 = 0; i1 < col; i1++) {
+					for (i = 0; i < row; i++) {
+						wdsp += "<div></div>"
+					}
+				}
+				box.innerHTML = wdsp;
+
+			}
+			chushihua();
+			let food = rand();
+			body[127].style.backgroundColor = "red"
+			var head = 127;
+			var changeposition = 0;
+			addEventListener("keypress", function(e) {
+				let keyvalue = e.key;
+				keyvalue = keyvalue.toLowerCase();
+				switch (keyvalue) {
+					case "w":
+						if (changeposition != 3) {
+							head = move(head, 1);
+						}
+						break;
+					case "a":
+						if (changeposition != 4) {
+							head = move(head, 2);
+						}
+						break;
+					case "s":
+						if (changeposition != 1) {
+							head = move(head, 3);
+						}
+						break;
+					case "d":
+						if (changeposition != 2) {
+							head = move(head, 4);
+						}
+						break;
+					default:
+						break;
+				}
+			})
+			setInterval(function() {
+				head = move(head, changeposition)
+			}, 250)
+		</script>
+	</body>
+</html>

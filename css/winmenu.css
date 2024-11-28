@@ -1,0 +1,65 @@
+.winmenu {
+	position: absolute;
+	transition: all 0.3s ease-out;
+	flex-direction: column;
+	width: 280px;
+	bottom: 100%;
+	left: -280px;
+	background-color: rgba(255, 255, 255, 0.5);
+
+}
+
+.win:hover>div {
+	display: flex;
+	left: 0px;
+	box-shadow: #000000 1px 3px 20px;
+}
+
+.winmenu>div {
+	width: 100%;
+	height: 50px;
+	display: flex;
+}
+
+.winmenu>div :nth-of-type(1) {
+	width: 50px;
+	padding-left: 8px;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.winmenu>div :nth-of-type(2) {
+	flex: 1;
+	height: 100%;
+	font-size: 18px;
+	color: black;
+	line-height: 50px;
+}
+
+.winmenu>div :nth-of-type(3) {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 30px;
+	height: 100%;
+}
+
+.winmenu>div:hover {
+	background-color: rgba(255, 255, 255, 0.7);
+	
+}
+.winmenu>div:hover :nth-of-type(2):hover
+{
+	font-weight: 600;
+}
+
+
+.winmenu:nth-of-type(1) :nth-of-type(1) {
+	font-size: 30px;
+	color: #444;
+}
+.winmenu>div:nth-of-type(1):hover :nth-of-type(1)
+{
+	color: #222;
+}

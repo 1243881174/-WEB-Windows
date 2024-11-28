@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>2048</title>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				width: 100vw;
+				height: 100vh;
+			}
+
+			main {
+				width: 100%;
+				height: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			box {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				grid-template-rows: repeat(4, 1fr);
+				text-align: center;
+				border: 2px solid #000000;
+			}
+
+			box div {
+				border-radius: 10px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-size: 2rem;
+				border: 1px solid #DEB887;
+			}
+		</style>
+	</head>
+	<body style="background-color: #DEB887;">
+		<main>
+			<box>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+			</box>
+		</main>
+		<script type="text/javascript">
+			
+			let H=document.body.clientHeight*0.7;
+			
+			let box=document.querySelectorAll("box")[0];
+			
+			box.style.width=H+"px";
+			box.style.height=H+"px";
+			
+			window.onresize=function(){
+				H=document.body.clientHeight*0.7;
+				box.style.width=H+"px";
+				box.style.height=H+"px";
+			}
+			
+			let alldiv = document.getElementsByTagName("div");
+			let allblock = [];
+			let col=[];
+			let row=[];
+			let lastkey;
+			let colorSheet = {
+			            "2": "#FFEC90",
+			            "4": "#FFC100",
+			            "8": "#FF5100",
+			            "16": "#FF005C",
+			            "32": "#B900FF",
+			            "64": "#7A00FF",
+			            "128": "#003CFF",
+			            "256": "#00CFFF",
+			            "512": "#00FF63",
+			            "1024": "#7EFF00",
+			            "2048": "#BEFF00"
+			 };
+			function rendercolor(index)
+			{
+				alldiv[index].style.backgroundColor = colorSheet[allblock[index]];
+			}
+			function add1()
+			{
+				let suiji = Math.floor(Math.random() * 16);
+					if(allblock[suiji]==0)
+					{
+						allblock[suiji]=2;
+					}else {
+						add1();
+						return 0;
+					}
+			}
+			(function initblock() {
+				let unrepeat = [];
+				for (let i = 0; i < 16; i++) {
+					allblock.push(0);
+				}
+				while (unrepeat.length < 10) {
+					let suiji = Math.floor(Math.random() * 16);
+					do {
+						if (unrepeat.indexOf(suiji) == -1) break;
+						suiji = Math.floor(Math.random() * 16);
+					} while (true);
+					unrepeat.push(suiji);
+				}
+				for (let i of unrepeat) {
+					allblock[i] = 2;
+				}
+				render();
+			})()
+			function changecol()
+			{
+				for (let i = 0; i <4; i++) {
+					let temp=[];
+					let a=0
+					let index=0;
+					while(a!=4){
+						temp.push(i+index);
+						index+=4;
+						a++;
+					}
+					col.push(temp);
+				}
+			}
+		
+			function render() {
+				for (let i = 0; i < alldiv.length; i++) {
+					alldiv[i].style.backgroundColor = "transparent";
+					alldiv[i].innerText = "";
+				}
+				for (let i = 0; i < allblock.length; i++) {
+					if (allblock[i] != 0) {
+						rendercolor(i);
+						alldiv[i].innerText = allblock[i];
+					}
+				}
+			}
+			let moveup = function() {
+				let success=0;
+				for (let i1 = 0; i1 < 4; i1++) {
+					for (let i = 0; i < allblock.length; i++) {
+						if (allblock[i] == 0 || i - 4 < 0) continue;
+						else {
+							if (allblock[i] == allblock[i - 4]) {
+								allblock[i] = 0;
+								allblock[i - 4] *= 2;
+								success=1;
+							} else if (allblock[i - 4] == 0) {
+								let temp = allblock[i];
+								allblock[i] = 0;
+								allblock[i - 4] = temp;
+								success=1;
+							}
+						}
+					}
+				}
+				if(success) add1();
+				render();
+			}
+			let movedown = function() {
+				let success=0;
+				for (let i1 = 0; i1 < 4; i1++) {
+					for (let i = allblock.length; i >= 0; i--) {
+						if (allblock[i] == 0 || i + 4 > 16) continue;
+						else {
+							if (allblock[i] == allblock[i + 4]) {
+								allblock[i] = 0;
+								allblock[i + 4] *= 2;
+								success=1;
+							} else if (allblock[i + 4] == 0) {
+								let temp = allblock[i];
+								allblock[i] = 0;
+								allblock[i + 4] = temp;
+								success=1;
+							}
+						}
+					}
+				}
+				if(success) add1();
+				render();
+			}
+			let moveleft = function() {
+				let success=0;
+				changecol();
+				for (let i1 = 0; i1 < 4; i1++) {
+					for (let i = 0; i < allblock.length; i++) {
+						if (allblock[i] == 0 || col[0].includes(i)||i-1<0) continue;
+						else {
+							if (allblock[i] == allblock[i - 1]) {
+								allblock[i] = 0;
+								allblock[i - 1] *= 2;
+								success=1;
+							} else if (allblock[i - 1] == 0) {
+								let temp = allblock[i];
+								allblock[i] = 0;
+								allblock[i - 1] = temp;
+								success=1;
+							}
+						}
+					}
+				}
+				if(success) add1();
+				render();
+			}
+			let moveright = function() {
+					let success=0;
+					changecol();
+					for (let i1 = 0; i1 < 4; i1++) {
+						for (let i = allblock.length; i >= 0; i--) {
+							if (allblock[i] == 0 || i + 1 > 16||col[3].includes(i)) continue;
+							else {
+								if (allblock[i] == allblock[i + 1]) {
+									allblock[i] = 0;
+									allblock[i + 1] *= 2;
+									success=1;
+								} else if (allblock[i + 1] == 0) {
+									let temp = allblock[i];
+									allblock[i] = 0;
+									allblock[i + 1] = temp;
+									success=1;
+								}
+							}
+						}
+					}
+					if(success) add1();
+					render();
+			}
+			document.addEventListener("keyup", (e) => {
+				switch (e.key) {
+					case "w":
+						moveup();
+						break;
+					case "a":
+						moveleft();
+						break;
+					case "s":
+						movedown();
+						break;
+					case "d":
+						moveright();
+						break;
+					default:
+						break;
+				}
+			})
+		</script>
+	</body>
+</html>

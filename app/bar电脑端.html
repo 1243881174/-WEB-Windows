@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+				user-select: none;
+			}
+			body{
+				width: 100vw;
+				height: 100vh;
+				background:linear-gradient(90deg,#49aeff,#ff4c89);
+				overflow: hidden;
+			}
+			.drag {
+				--WH:220px;
+				position: absolute;
+				width:var(--WH);
+				height: var(--WH);
+			}
+			.drag j{
+				width: 100%;
+				height: 100%;
+				filter: blur(35px);
+				position: absolute;
+				border-radius: 50%;
+			}
+			j {
+				inset: -4px;
+				background-color: white;
+			}
+			#hint {
+				z-index: 2;
+				color: skyblue;
+				font-size: 18px;
+				font-weight: bolder;
+				letter-spacing: 3px;
+			}
+			#hint {
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%,-50%);
+			}
+			#sinletext {
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 100vw;
+				height: 100vh;
+				display: grid;
+				grid-template-columns: repeat(9,1fr);
+				grid-template-rows: repeat(16,1fr);
+			}
+			mask {
+				position: absolute;
+				width:140px;
+				height: 140px;
+				overflow: hidden;
+				filter: blur(1px);
+				border-radius: 50%;
+			}
+			#sinletext div {
+				font-size: 23px;
+				font-weight: bolder;
+				letter-spacing: 3px;
+				
+				color: transparent;
+				background:linear-gradient(90deg,#49aeff,#ff4c89);
+				-webkit-background-clip: text;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="drag">
+				<j></j>
+				<span id="hint">拖拽我</span>
+				<mask>
+					<content id="sinletext">
+						
+						
+					</content>
+				</mask>
+		</div>
+		<script type="text/javascript">
+			let drag=document.querySelectorAll(".drag")[0];
+			let mask=document.querySelectorAll("mask")[0];
+			let text=document.querySelector("#hint");
+			let sinletext=document.querySelector("#sinletext");
+			let H=document.body.clientHeight;
+			let W=document.body.clientWidth;
+			drag.style.left=W/2-drag.offsetWidth/2+"px";
+			drag.style.top=H/2-drag.offsetHeight/2+"px";
+			
+			window.onresize=function()
+			{
+				H=document.body.clientHeight;
+				W=document.body.clientWidth;
+				drag.style.left=W/2-drag.offsetWidth/2+"px";
+				drag.style.top=H/2-drag.offsetHeight/2+"px";
+			}
+			function center(element)
+			{
+				let parent=element.parentNode;
+				element.style.left=parent.offsetWidth/2-element.offsetWidth/2+"px";
+				element.style.top=parent.offsetHeight/2-element.offsetHeight/2+"px";
+			}
+			center(mask);
+			
+				function init(){
+					let wdsp=document.createDocumentFragment();
+					for(let i=0;i<9*16;i++)
+					{
+						wdsp.appendChild(document.createElement("div"));
+					}
+					sinletext.appendChild(wdsp);
+					let alldiv=document.querySelectorAll("#sinletext div");
+					const text="臭傻逼".split("");
+					for(let i=0,i1=0;i<alldiv.length;i++)
+					{
+						let probability=Math.round(Math.random()*10);
+						if(probability==1)
+						{
+							alldiv[i].innerText=text[i1++%3];
+						}
+					}
+				}
+			function mousedrag()
+			{
+				let mouseX,mouseY;
+				let startx,starty;
+				let juedge=false;
+				drag.addEventListener("mousedown",(e)=>{
+					juedge=true
+					mouseX=e.pageX;
+					mouseY=e.pageY;
+					startx=mouseX-drag.offsetLeft;
+					starty=mouseY-drag.offsetTop;
+				})
+				document.getRootNode().addEventListener("mousemove",(e)=>{
+					if(juedge)
+					{
+						if(text.style.display!="none")init()
+						text.style.display="none"
+						mouseX=e.pageX;
+						mouseY=e.pageY;
+						drag.style.left=mouseX-startx+"px";
+						drag.style.top=mouseY-starty+"px";
+						reset(drag.offsetLeft,drag.offsetTop)
+					}
+				})
+				document.getRootNode().addEventListener("mouseup",(e)=>{
+					startx=starty=0
+					juedge=false;
+				})
+			}
+			mousedrag()
+			reset(drag.offsetLeft,drag.offsetTop)
+			function reset(a,b)
+			{
+				let x=0,y=0;
+				let temp=sinletext;
+				while(temp!=document.body)
+				{
+					x+=temp.parentNode.offsetLeft;
+					y+=temp.parentNode.offsetTop;
+					temp=temp.parentNode;
+				}
+				sinletext.style.left=-x+"px";
+				sinletext.style.top=-y+"px";
+			}
+		</script>
+	</body>
+</html>

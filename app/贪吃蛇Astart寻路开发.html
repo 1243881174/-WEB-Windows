@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			* {
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+
+			body,
+			html {
+				width: 100vw;
+				height: 100vh;
+			}
+
+			body {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				background-color: white;
+			}
+
+			#box {
+				display: grid;
+				grid-template-columns: repeat(20, 1fr);
+				grid-template-rows: repeat(20, 1fr);
+				width: 900px;
+			}
+
+			#box div {
+				background-color: pink;
+				border: 1px black solid;
+
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="box">
+		</div>
+		<script type="text/javascript" src="fun.js"></script>
+		<script type="text/javascript">
+			Math.seed = new Date().getSeconds();
+			
+			Math.seededRandom = function(max, min) {
+				max = max || 1;
+				min = min || 0;
+				Math.seed = (Math.seed * 9301 + 49297) % 233280;
+
+				var rnd = Math.seed / 233280.0;
+
+				return min + rnd * (max - min);
+			};
+
+			let box = document.getElementById("box");
+
+			let col, row;
+			col = row = 20;
+			(function() {
+				let wdsp = document.createDocumentFragment();
+				wdsp = "";
+				let i1 = 0;
+				i = 0
+				for (i1 = 0; i1 < col; i1++) {
+					for (i = 0; i < row; i++) {
+						wdsp += "<div></div>"
+					}
+				}
+				box.innerHTML = wdsp;
+			})();
+
+			let allgrid = box.getElementsByTagName("div");
+
+			let long = 0;
+			let bodylong = [];
+
+			let head = Math.floor(Math.seededRandom() * allgrid.length); //随机蛇头位置
+
+			allgrid[head].style.backgroundColor = "red"
+
+			function foodrand() {
+				let rand;
+				rand = Math.floor(Math.seededRandom() * allgrid.length);
+				for (let i = 0; i < bodylong.length; i++) {
+					if (rand == bodylong[i] || rand == head) {
+						rand = Math.floor(Math.seededRandom() * allgrid.length);
+						i = 0;
+					}
+				}
+				allgrid[rand].style.backgroundColor = "yellow";
+				return rand;
+			}
+
+			function touch(result) {
+				for (let i = 0; i < bodylong.length-1; i++) {
+					if (result == bodylong[i]) {
+						alert("你gg了");
+					}
+				}
+			}
+
+			function grow(a, arr) {
+				//判断胜利
+				if (long > row * col) {
+					clearInterval(timer);
+					alert("你成功了");
+				}
+				//身体位置数据
+				if (long != 0) {
+					arr.unshift(a);
+				}
+				while (arr.length > long) {
+					allgrid[arr.pop()].style.backgroundColor = "pink";
+
+				}
+			}
+
+			function price(head, food) //价格
+			{
+
+				let colprice = Math.abs(parseInt(head / row) - parseInt(food / row));
+				let rowprice = Math.abs(head % row - food % row);
+				return colprice + rowprice;
+			}
+
+			function nextxy(snackhead, position) {
+				let result;
+				switch (position) {
+					case 0:
+						result = snackhead - row;
+						if (result < 0) result = result + (row * row);
+						break;
+					case 1:
+						snackhead % row == 0 ? result = snackhead + row - 1 : result = snackhead - 1;
+						break;
+					case 2:
+						result = snackhead + row;
+						if (result > row * row - 1) result = result - row * row;
+						break;
+					case 3:
+						result = snackhead + 1;
+						result % row == 0 ? result = result - row : result;
+						break;
+					default:
+						return undefined;
+						break;
+				}
+				return result
+			}
+
+			function Data() {
+				return {
+					parent: null,
+					xy: 0,
+					cost: 0,
+					dir: 0,
+				}
+			}
+			function hlepmyself(head)
+			{
+				let open=[];
+				for (let i = 0; i < 4; i++) {
+					let node = new Data();
+					node.xy = nextxy(head, i)
+					node.cost = price(head, food)
+					node.dir = i;
+					if(bodylong.indexOf(node.xy)!=-1){
+						open.push(node);
+					}
+				}
+				
+				let costmin = open[0].cost,
+					index = 0;
+				
+				for (let i = 1; i < open.length; i++) {
+					if (open[i].cost < costmin) {
+						costmin = open[i].cost
+						index = i;
+					}
+				}
+				return open[index].dir;
+				
+				
+			}
+			let path = [];
+
+			function Astar(head, food, bodydata) {
+				if(head==food){
+					console.log("我有用到吗");
+					return hlepmyself(head);
+				 }
+				let open = [],
+					close = [];
+
+				for(let i=0;i<bodydata.length-1;i++)
+				{
+					let data = new Data();
+					data.xy = bodydata[i];
+					close.push(data);
+				};
+
+				let headnode = new Data();
+
+				headnode.parent = null;
+				headnode.xy = head;
+
+				let curnode = headnode;
+				close.push(headnode);
+
+				while (true) {
+					label: for (let i = 0; i < 4; i++) {
+						for (let i1 = 0; i1 < close.length; i1++) {
+							if (nextxy(curnode.xy, i) == close[i1].xy) {
+								continue label;
+							}
+						}
+
+						let node = new Data();
+						node.parent = curnode;
+						node.xy = nextxy(curnode.xy, i)
+						node.cost = price(curnode.xy, food)
+						node.dir = i;
+						open.push(node);
+						close.push(node);
+					}
+					if (open.length == 0) {
+						// head = curnode.xy;
+						return undefined;
+					}
+
+					let costmin = open[0].cost,
+						index = 0;
+
+					for (let i = 1; i < open.length; i++) {
+						if (open[i].cost < costmin) {
+							costmin = open[i].cost
+							index = i;
+						}
+					}
+
+					curnode = open[index];
+					open.splice(index, 1);
+
+					if (curnode.xy == food) {
+						while (curnode.parent != null) {
+							path.unshift(curnode.dir)
+							// allgrid[curnode.xy].style.backgroundColor="blue";
+							curnode = curnode.parent;
+						}
+						// allgrid[curnode.xy].style.backgroundColor="black";
+						return path[0];
+					}
+				}
+
+			}
+
+			function ai(head, food) {
+				// a*  找到了返回方向 没找到返回undefind
+				let virtual = [];
+				let virtualhead = head;
+				let virtuallong = long;
+				// for(let i=0;i<allgrid.length;i++) allgrid[i].style.backgroundColor="pink";
+				
+				bodylong.forEach(function(item) {
+					virtual.push(item);
+				})
+				
+				if(virtuallong<5)
+				{
+					return Astar(head, food, bodylong);
+				}
+
+				while (virtualhead != food) {
+					virtualhead = nextxy(virtualhead, Astar(virtualhead, food, virtual));
+					grow(virtualhead, virtual);
+					if (virtualhead == undefined) {
+						return Astar(head, bodylong[bodylong.length - 1], bodylong);
+					}
+				}
+				
+				if (Astar(food, virtual[virtual.length - 1], virtual) != undefined) 
+				{
+					return Astar(head, food, bodylong);
+				}
+				return Astar(head, bodylong[bodylong.length - 1], bodylong);
+				
+				
+			}
+
+			function move(snackhead, position) {
+				
+				let result;
+				
+				
+				allgrid[snackhead].style.backgroundColor = "pink"
+				//计算当前蛇头位置
+				switch (position) {
+					case 0:
+						result = snackhead - row;
+						if (result < 0) result = result + (row * row);
+						break;
+					case 1:
+						snackhead % row == 0 ? result = snackhead + row - 1 : result = snackhead - 1;
+						break;
+					case 2:
+						result = snackhead + row;
+						if (result > row * row - 1) result = result - row * row;
+						break;
+					case 3:
+						result = snackhead + 1;
+						result % row == 0 ? result = result - row : result;
+						break;
+					default:
+						console.log("不知道怎么办了");
+						break;
+				}
+				if (result === undefined) return snackhead;
+				//渲染蛇身
+				touch(result);
+				grow(result, bodylong);
+				for (let i = 0; i < bodylong.length; i++) {
+					allgrid[bodylong[i]].style.backgroundColor = "green"
+				}
+				//渲染蛇头
+				allgrid[result].style.backgroundColor = "red";
+				// if(bodylong.length!=0)
+				// allgrid[bodylong[bodylong.length-1]].style.backgroundColor = "blue";
+				if (result == food) {
+					long++;
+					food = foodrand();
+				}
+				return result;
+			}
+			let food = foodrand();
+			grow(head, bodylong);
+			timer = setInterval(function() {
+				head = move(head, ai(head, food));
+			}, 60)
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			body,html {
+				width: 100vw;
+				height: 100vh;
+				background-color: cadetblue;
+			}
+			#fram {
+				position:absolute;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%,-50%);
+				border: 2px solid wheat;
+			}
+			#main {
+				width: 100%;
+				height: 100%;
+				display: grid;
+				grid-gap: 1px;
+				padding: 1px;
+			}
+			#main>div {
+				background-color: #999;
+				box-shadow: inset 0 0 3px 3px #888;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				cursor: pointer;
+			}
+			#message {
+				position: absolute;
+				left: 50%;
+				transform: translateX(-50%) translateY(-100%);
+				display: inline-flex;
+				justify-content: center;
+				align-items: center;
+			}
+			#message *{
+				font-size: 25px;
+			}
+			#message>div:nth-of-type(1)
+			{
+				position: absolute;
+				left: 0%;
+			}
+			#main {
+				font-size: 14px;
+			}
+		</style>
+	</head>
+	<body>
+		
+		<div id="fram">
+			<div id="message">
+				<div id="sum">
+					
+				</div>
+				<span>时间:&nbsp;&nbsp;&nbsp;</span>
+				<div id="time">
+					0
+				</div>
+			</div>
+			<div id="main">
+			</div>
+		</div>
+		<script type="text/javascript">
+			
+			
+			
+			function $(id){
+						return document.getElementById(id);
+			}
+			let main=$("main");
+			let fram=$("fram");
+			let message=$("message");
+			let time=$("time");
+			let sum=$("sum");
+			
+			
+			document.oncontextmenu = function(){
+			　　return false;
+			}
+			
+			
+			let grid=21;
+			let dangerous=50;
+			let finalty=true;
+			
+			let H=document.body.clientHeight*0.8;
+			
+			message.style.width=H+"px";
+			fram.style.width=H+"px";
+			fram.style.height=H+"px";
+			
+			window.addEventListener("resize",()=>{
+					H=document.body.clientHeight*0.8;
+					fram.style.width=H+"px";
+					fram.style.height=H+"px";
+					message.style.width=H+"px";
+			})
+			
+			
+			setInterval(()=>{
+				time.innerText=time.innerText*1+1;
+			},1000)
+			
+			
+			
+			sum.innerText="雷:"+dangerous
+			let alldiv
+			let mine=[];
+			function init()
+			{
+				main.style.gridTemplateColumns=`repeat(${grid},1fr)`;
+				main.style.gridTemplateRows=`repeat(${grid},1fr)`;
+				let temp=document.createDocumentFragment();
+				temp.innerHTML="";
+				for(let i=0;i<grid**2;i++)
+				{
+					temp.innerHTML+=`<div></div>`;
+				}
+				main.innerHTML=temp.innerHTML;
+				
+				alldiv=main.getElementsByTagName("div");
+				
+				let j=0;
+				for(let i of alldiv)
+				{
+					i.className=j++;
+					i.onmousedown=function(even)
+					{
+						if(even.button==2)
+						{
+							if(this.style.backgroundColor=="red")
+							{
+								this.style.backgroundColor="#999"
+								let t=jiekai.indexOf(this.className*1);
+								jiekai.splice(t,1)
+								dangerous++;
+							}else if(dangerous>0&&!jiekai.includes(this.className*1))
+							{
+								this.style.backgroundColor="red";
+								jiekai.push(this.className*1);
+								dangerous--;
+							}
+							sum.innerText="雷:"+dangerous;
+						}
+						if(even.button==0)
+						{
+							if(this.style.backgroundColor=="white")
+							{
+								decode(this.className*1);
+							}else
+							{
+								this.style.backgroundColor="white"
+								if(mine.includes(this.className*1))
+								{
+										end(this.className*1);
+								}else
+								around(this.className*1,0);
+							}
+						}
+						if(finalty)
+						last();
+					}
+				}
+				for(let i=0;i<dangerous;i++)
+				{
+					let suiji=Math.floor(Math.random()*grid**2);
+					while(mine.includes(suiji))
+					{
+						suiji=Math.floor(Math.random()*grid**2);
+					}
+					// alldiv[suiji].innerText="雷"
+					mine.push(suiji);
+				}
+			}
+			init()
+			let jiekai=[];
+			function around(name,er)
+			{
+				if(mine.includes(name)){ 
+					end(name);
+					return 0;
+				}
+				let count=calc(name)
+				alldiv[name].style.backgroundColor="white";
+				jiekai.push(name);
+				if(count==0||er)
+				{
+					if(name+grid<grid**2) if(!jiekai.includes(name+grid)) around(name+grid);
+					if(name-grid>=0) if(!jiekai.includes(name-grid)) around(name-grid);
+					if(name%grid-1>=0) if(!jiekai.includes(name-1)) around(name-1);
+					if(name%grid+1<grid) if(!jiekai.includes(name+1)) around(name+1);
+					if((name%grid+1<grid)&&(name+1+grid)<grid**2) if(!jiekai.includes(name+1+grid)) around(name+1+grid);
+					if((name%grid-1>=0)&&(name-1-grid)>=0) if(!jiekai.includes(name-1-grid)) around(name-1-grid);
+					if((name%grid-1>=0)&&(name-1+grid)<grid**2) if(!jiekai.includes(name-1+grid)) around(name-1+grid);
+					if((name%grid+1<grid)&&(name+1-grid)>=0) if(!jiekai.includes(name+1-grid)) around(name+1-grid);
+					
+				}
+				if(count)
+				{
+						alldiv[name].innerText=count;
+				}
+			}
+			function calc(name)
+			{
+				let lei=0
+				if(name+grid<grid**2) if(mine.includes(name+grid)) lei++;
+				if(name-grid>=0) if(mine.includes(name-grid)) lei++;
+				if(name%grid-1>=0) if(mine.includes(name-1)) lei++;
+				if(name%grid+1<grid) if(mine.includes(name+1)) lei++;
+				if((name%grid+1<grid)&&(name+1+grid)<grid**2) if(mine.includes(name+1+grid)) lei++;
+				if((name%grid-1>=0)&&(name-1-grid)>=0) if(mine.includes(name-1-grid)) lei++;
+				if((name%grid-1>=0)&&(name-1+grid)<grid**2) if(mine.includes(name-1+grid)) lei++;
+				if((name%grid+1<grid)&&(name+1-grid)>=0) if(mine.includes(name+1-grid)) lei++;
+				
+				return lei;
+			}
+			
+			
+			function end(i)
+			{
+				finalty=false;
+				alert("你输了");
+				for(let k of mine)
+				{
+						alldiv[k].innerText="雷"
+						alldiv[k].style.backgroundColor="red"
+				}
+				for(let i of alldiv)
+				{
+					i.onmousedown="";
+				}
+			}
+			function last()
+			{
+				for(let i of mine)
+				{
+					if(alldiv[i].style.backgroundColor!="red")
+					{
+						return 0;
+					}
+				}
+				alert("你赢了");
+				for(let k of mine)
+				{
+						alldiv[k].innerText="雷"
+						alldiv[k].style.backgroundColor="red"
+				}
+				for(let i of alldiv)
+				{
+					i.onmousedown="";
+				}
+				
+			}
+			function decode(name)
+			{
+				
+				let lei=calc(name);
+				if(name+grid<grid**2) if(alldiv[name+grid].style.backgroundColor=="red") lei--;
+				if(name-grid>=0) if(alldiv[name-grid].style.backgroundColor=="red") lei--;
+				if(name%grid-1>=0) if(alldiv[name-1].style.backgroundColor=="red") lei--;
+				if(name%grid+1<grid) if(alldiv[name+1].style.backgroundColor=="red") lei--;
+				if((name%grid+1<grid)&&(name+1+grid)<grid**2) if(alldiv[name+1+grid].style.backgroundColor=="red")lei--;
+				if((name%grid-1>=0)&&(name-1-grid)>=0) if(alldiv[name-1-grid].style.backgroundColor=="red") lei--;
+				if((name%grid-1>=0)&&(name-1+grid)<grid**2) if(alldiv[name-1+grid].style.backgroundColor=="red") lei--;
+				if((name%grid+1<grid)&&(name+1-grid)>=0) if(alldiv[name+1-grid].style.backgroundColor=="red") lei--;
+				if(lei<=0)
+				around(name,true);
+				else around(name,false);
+			}
+		</script>
+	</body>
+</html>
